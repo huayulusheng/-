@@ -54,6 +54,7 @@
 osThreadId_t oled_show_task_id;
 osThreadId_t uart_recv_task_id;
 osThreadId_t uart1_recv_task_id;
+osThreadId_t uart2_recv_task_id;
 osThreadId_t udp_send_task_id;
 osThreadId_t udp_recv_task_id;
 osThreadId_t key_user_task_id;
@@ -135,7 +136,7 @@ static void agriculture_example(void)
     if (key_test_task_id != NULL) {
         printf("ID = %d, Create uart_recv_task_id is OK!\r\n", key_test_task_id);
     }
-    /********************************** 火焰报警器任务 **********************************/
+    /********************************** sgp30任务 **********************************/
     options.name = "flame_user_task";
     options.priority = osPriorityNormal;
     flame_task_id = osThreadNew((osThreadFunc_t)flame_SGP30_test_task, NULL, &options);
@@ -156,5 +157,15 @@ static void agriculture_example(void)
     if (wifi_tcp_task_id != NULL) {
         printf("ID = %d, Create wifi_tcp_id is OK!\r\n", wifi_tcp_task_id);
     }
+
+    /********************************** 联网获取信息**********************************/
+    options.name = "uart2_recv_task";
+    options.priority = osPriorityNormal;
+    uart2_recv_task_id = osThreadNew((osThreadFunc_t)uart2_recv_task, NULL, &options);
+    if (uart2_recv_task_id != NULL) {
+        printf("ID = %d, Create wifi_tcp_id is OK!\r\n", uart2_recv_task_id);
+    }
+
+
 }
 SYS_RUN(agriculture_example);

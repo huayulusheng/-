@@ -56,7 +56,9 @@ typedef struct _system1_value {
 extern system_value_t systemdata; // 系统全局变量
 extern char buff[256];
 extern hi_u8 recvBuff[200];
-
+extern uint16_t light_set[4];
+extern uint16_t pwm1_arr,pwm2_arr;
+extern hi_u8 recedata;
 extern tn_pcf8574_io_t pcf8574_io;
 #define IO_FAN pcf8574_io.bit.p0
 #define IO_BUZZER pcf8574_io.bit.p1

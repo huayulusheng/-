@@ -44,8 +44,11 @@ osThreadId_t Task1_ID = 0;        //  任务1 ID
 hi_gpio_value val, val_last;      // GPIO的状态值
 #define TASK_STACK_SIZE 1024
 #define TASK_DELAY_TIME (200 * 1000)
+uint16_t light_set[4]={0,0,0,0 };
+uint16_t pwm1_arr,pwm2_arr;
 uint32_t i;
 uint8_t dblclick;
+
 uint16_t sun=0;
 // extern tn_pcf8574_io_t tmp_io = {0}; // IO扩展芯片的引脚
 char buff[256];
@@ -120,6 +123,95 @@ void key_test_task(void)                    //控制电机函数
         // usleep(300000);
         // IoTGpioSetOutputVal(9, 0);
         // usleep(300000);
+        if(recedata==1)
+				{
+					if(recvBuff[1]== 0x50)
+					{
+						light_set[1]=recvBuff[2];
+					}
+					
+					if(recvBuff[1]== 0x53)
+					{
+						if(recvBuff[2]==0x01)
+						{
+							light_set[0]=1;
+						}
+						else
+						{
+							light_set[0]=0;
+						}
+					}
+					if(recvBuff[1]== 0x51)
+					{
+						uint16_t k = 999*(100/light_set[1]);
+						if(recvBuff[2]==0x01)
+						{
+							
+							if(light_set[0]==0)
+							{
+								
+							pwm1_arr= k;
+							pwm2_arr=	999-k;
+							}
+							if(light_set[0]==1)
+							{
+								for(uint16_t i=0;i<k;i++)
+								{
+									
+									hi_pwm_stop(HI_PWM_PORT_PWM0);
+                  hi_pwm_start(HI_PWM_PORT_PWM0, 1000-i, pwm1_arr);
+                  osDelay(1);
+
+								}
+								for(uint16_t i=0;i<(999-k);i++)
+								{
+									
+									
+									hi_pwm_stop(HI_PWM_PORT_PWM1);
+                  hi_pwm_start(HI_PWM_PORT_PWM1, 1000-i, pwm2_arr);
+                  osDelay(1);
+								}
+								
+								hi_pwm_stop(HI_PWM_PORT_PWM0);
+                hi_pwm_stop(HI_PWM_PORT_PWM1);
+                hi_pwm_start(HI_PWM_PORT_PWM0, 1000-sun, pwm1_arr);
+                hi_pwm_start(HI_PWM_PORT_PWM1, 1000-sun, pwm2_arr);
+							}
+							
+						}
+						else 
+						{
+							if(light_set[0]==0)
+							{
+							pwm1_arr= 0;
+							pwm2_arr=	0;
+							}
+							if(light_set[0]==1)
+							{
+								for(uint16_t i=k;i>0;i--)
+								{
+									
+									hi_pwm_stop(HI_PWM_PORT_PWM0);
+                  hi_pwm_start(HI_PWM_PORT_PWM0, 1000-i, pwm1_arr);
+
+									osDelay(1);
+								}
+								for(uint16_t i=(999-k);i>0;i--)
+								{
+									hi_pwm_stop(HI_PWM_PORT_PWM1);
+                  hi_pwm_start(HI_PWM_PORT_PWM1, 1000-i, pwm2_arr);
+                  osDelay(1);
+								}
+								hi_pwm_stop(HI_PWM_PORT_PWM0);
+                hi_pwm_stop(HI_PWM_PORT_PWM1);
+                hi_pwm_start(HI_PWM_PORT_PWM0, 0, pwm1_arr);
+                hi_pwm_start(HI_PWM_PORT_PWM1, 0, pwm2_arr);
+							}
+						}
+					}
+
+					recedata=0;
+				}
 
 
 
